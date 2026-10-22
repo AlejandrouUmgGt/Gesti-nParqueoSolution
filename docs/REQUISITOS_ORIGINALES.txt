@@ -1,0 +1,78 @@
+Contexto: soy estudiante de Ingeniería en Sistemas (UMG, Programación II). Debo desarrollar, en grupo, el Proyecto Final "Sistema de Gestión de Parqueo (Estacionamiento)" en C# con Windows Forms y SQL Server. Tiene que aplicar POO, y lo más importante es que se vea claramente la ABSTRACCIÓN, la herencia y el polimorfismo. Yo debo explicar y defender cada línea, así que el código debe ser simple, legible y comentado.
+
+REGLAS TÉCNICAS
+- C# y .NET modernos (el de mi Visual Studio, net8.0-windows).
+- Solución en blanco GestionParqueo con carpetas de solución Backend y Frontend. Backend contiene la biblioteca de clases LibreriaClases. Frontend contiene la aplicación Windows Forms GestionParqueo.UI, que referencia a LibreriaClases.
+- Solo se permite el paquete Microsoft.Data.SqlClient, usando únicamente SqlConnection, SqlCommand, SqlDataReader y SqlDataAdapter. Nada de Entity Framework, Dapper ni otras librerías.
+- La base de datos usa SOLO AUTENTICACIÓN DE WINDOWS (Integrated Security=True). La cadena de conexión no lleva usuario ni contraseña de SQL. Vive en una sola clase, Conexion, con el servidor en una constante fácil de cambiar (por ejemplo (localdb)\MSSQLLocalDB o .\SQLEXPRESS) y con TrustServerCertificate=True para evitar errores de certificado con Microsoft.Data.SqlClient.
+- Todas las consultas parametrizadas con SqlParameter. Las contraseñas de los empleados (login de la aplicación) siempre con hash.
+- Sin código avanzado que yo no pueda explicar: sin reflection, sin genéricos complejos, sin patrones sofisticados, sin async innecesario.
+- Comentarios en español, cortos, que expliquen el porqué.
+- No uses código copiado de librerías o proyectos externos.
+
+ESTRUCTURA
+GestionParqueoSolution (solución en blanco)
+├── README.md (instrucciones, se actualiza en cada etapa)
+├── Backend (carpeta de solución)
+│   └── LibreriaClases (biblioteca de clases)
+│       ├── Modelos
+│       ├── Enumeraciones
+│       ├── Datos
+│       └── Logica
+└── Frontend (carpeta de solución)
+    └── GestionParqueo.UI (Windows Forms)
+        ├── Forms (formularios modales de alta y edición)
+        └── Controles (UserControls, una pantalla por módulo)
+
+BACKEND (LibreriaClases)
+Carpetas: Modelos, Enumeraciones, Datos, Logica.
+
+ABSTRACCIÓN (debe ser el centro del diseño, con dos jerarquías):
+1) Persona (clase ABSTRACTA): Id, Nombres, Apellidos, Telefono, NombreCompleto (propiedad calculada), método abstracto ObtenerResumen() y método virtual ObtenerRol(). Propiedades con campos privados y validaciones. No se puede instanciar.
+   - Cliente : Persona (Membresia como bool, FechaRegistro). Override de ObtenerResumen() y ObtenerRol().
+   - Empleado : Persona (Cargo, Usuario, ClaveHash, Activo, Rol). Override de ObtenerResumen() y ObtenerRol(). Es quien inicia sesión en el sistema.
+2) Vehiculo (clase ABSTRACTA): Id, Placa, Propietario (Cliente), TipoVehiculo, método abstracto CalcularTarifa(int horas) y método virtual ObtenerDescripcion(). No se puede instanciar.
+   - Automovil : Vehiculo (NumeroPuertas). CalcularTarifa usa la tarifa base.
+   - Motocicleta : Vehiculo (Cilindraje). CalcularTarifa aplica descuento sobre la tarifa base.
+   - Camion : Vehiculo (CapacidadToneladas). CalcularTarifa aplica recargo sobre la tarifa base.
+   Cada hija hace override de CalcularTarifa() y ObtenerDescripcion().
+
+Otras clases (normales):
+- EspacioParqueo (Id, Numero, Nivel, Disponible), Tarifa (Id, TipoVehiculo, PrecioHora, PrecioDia, PrecioMensualidad), Movimiento (Id, Vehiculo, Espacio, FechaHoraEntrada, FechaHoraSalida, Duracion calculada), Pago (Id, Movimiento, Metodo, Monto, Fecha).
+- Enumeraciones: RolUsuario (Administrador, Cajero), MetodoPago (Efectivo, Tarjeta), TipoVehiculo (Automovil, Motocicleta, Camion).
+- Datos: Conexion y un Repositorio por entidad (Empleado, Cliente, Vehiculo, EspacioParqueo, Tarifa, Movimiento, Pago) con Listar, ObtenerPorId, Insertar, Actualizar y Eliminar, más las búsquedas que pidan los reportes. El VehiculoRepositorio debe devolver el objeto hijo correcto (Automovil, Motocicleta o Camion) según el tipo guardado.
+- Logica: Seguridad (hash de contraseñas), GestorParqueo (reglas de negocio: un vehículo no puede entrar si ya está dentro, un espacio ocupado no se asigna, al salir se calcula la duración y el monto llamando a CalcularTarifa() del vehículo, y se libera el espacio) y Sesion (empleado actual).
+
+BASE DE DATOS
+Base ParqueoDB en SQL Server con autenticación de Windows. El script debe crear la base si no existe y las tablas Empleado, Cliente, Vehiculo (con columna TipoVehiculo y columnas propias de cada hija que pueden ser NULL), EspacioParqueo, Tarifa, Movimiento y Pago, con llaves primarias, llaves foráneas y restricciones. No debe crear logins ni usuarios de SQL. Incluye datos de ejemplo (espacios en 2 niveles, tarifas por tipo de vehículo, algunos clientes y vehículos de los 3 tipos) y un empleado administrador inicial.
+
+FRONTEND (GestionParqueo.UI)
+El diseño debe ser SIMPLE Y TOSCO. Nada de estilos elaborados, nada de clase Tema, nada de colores personalizados, bordes redondeados, íconos ni degradados. Usa los controles estándar de Windows Forms con su apariencia por defecto.
+- FrmPrincipal: un MenuStrip arriba con los menús Información Base, Movimientos, Consultas y Reportes, Sesión (Cerrar sesión), y un Panel contenedor (Dock Fill) donde se cargan los UserControls. Método CargarControl(UserControl uc). Al iniciar solo se muestra UcLogin y el menú oculto; tras el login se muestra el menú según el rol; Cerrar sesión regresa a UcLogin.
+- UserControls en la carpeta Controles: UcLogin, UcClientes, UcVehiculos, UcEspacios, UcTarifas, UcEntradaSalida, UcPagos, UcReportes. Misma forma básica: un Label de título, un DataGridView de solo lectura con columnas configuradas por código, y botones Nuevo, Editar, Eliminar y Actualizar abajo. Como máximo un TextBox de búsqueda.
+- Forms modales en la carpeta Forms: FrmCliente, FrmVehiculo (con un ComboBox de tipo que crea el objeto hijo correcto), FrmEspacio, FrmTarifa, con validaciones básicas (MessageBox para errores) y botones Guardar y Cancelar. Reciben el objeto a editar por constructor (null si es nuevo).
+- UcEntradaSalida: registrar entrada (elegir vehículo y espacio libre, guardar fecha y hora) y registrar salida (elegir movimiento activo, calcular duración y monto, registrar el pago con método y monto, liberar el espacio).
+- Visibilidad por rol: Administrador ve todo; Cajero ve solo Entradas y Salidas, Pagos y Reportes, y Clientes y Vehículos en consulta.
+- UcReportes con pestañas (TabControl): ocupación por día y hora, ingresos por día y mes, clientes recurrentes, y un Directorio que recorre una List de Persona (clientes y empleados juntos) llamando ObtenerResumen(), y una List de Vehiculo llamando CalcularTarifa() y ObtenerDescripcion(), para demostrar polimorfismo.
+
+README (obligatorio en cada etapa)
+Crea y mantén un archivo README.md en la raíz de la solución, en español, que se ACTUALICE al final de cada etapa sin borrar lo anterior. Debe contener:
+1) Requisitos: Visual Studio, .NET 8, SQL Server (o LocalDB) y SQL Server Management Studio, y el paquete NuGet Microsoft.Data.SqlClient.
+2) Lo que se lleva creado: una sección por etapa terminada, con la lista de archivos creados, su ruta y para qué sirve cada uno.
+3) Pasos que debo hacer yo, en orden y muy concretos, para lo que ya está creado en esa etapa. Por ejemplo: crear la solución en blanco y las carpetas de solución, crear los proyectos con su nombre exacto, agregar la referencia de GestionParqueo.UI a LibreriaClases, instalar el NuGet, crear las carpetas del proyecto, pegar cada archivo en su ruta, ejecutar el script SQL en SSMS, ajustar el servidor en Conexion.cs, marcar GestionParqueo.UI como proyecto de inicio y qué debo ver al ejecutar para confirmar que esa etapa funciona.
+4) Cómo probar lo de la etapa (datos de ejemplo, usuario administrador inicial y qué esperar).
+5) Problemas comunes y su solución (error de conexión, certificado, referencia faltante, la base no existe).
+6) Un resumen de los conceptos de POO aplicados hasta el momento, para la exposición.
+Entrega el README.md completo y actualizado al final de cada etapa, listo para pegar.
+
+FORMA DE TRABAJO
+Entrégame todo por etapas y espera mi "continúa" entre una y otra:
+1) Script SQL completo con datos de ejemplo, y README inicial.
+2) Backend completo.
+3) FrmPrincipal y UcLogin.
+4) UserControls de información base (Clientes, Vehículos, Espacios, Tarifas).
+5) Forms modales.
+6) UcEntradaSalida y UcPagos.
+7) UcReportes.
+8) Lista de requerimientos y diagrama de clases (en texto) para el informe, y README final.
+En cada etapa da los archivos completos y listos para pegar, indicando el nombre y la ruta de cada uno, más el README.md actualizado. Al final de cada etapa agrega un resumen de máximo 5 líneas que diga qué hace y qué concepto de POO aplica, para que yo pueda explicarlo.
