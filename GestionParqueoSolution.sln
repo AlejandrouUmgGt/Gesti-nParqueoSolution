@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pruebas", "Pruebas", "{EC87
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PruebasBackend", "Pruebas\PruebasBackend\PruebasBackend.csproj", "{4ADEAADE-6D9A-497B-A779-5D626F14F744}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestionParqueo.UI", "Frontend\GestionParqueo.UI\GestionParqueo.UI.csproj", "{A7CF2461-FFF2-49E4-A2EB-CAB78B59A805}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,9 +32,14 @@ Global
 		{4ADEAADE-6D9A-497B-A779-5D626F14F744}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4ADEAADE-6D9A-497B-A779-5D626F14F744}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4ADEAADE-6D9A-497B-A779-5D626F14F744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7CF2461-FFF2-49E4-A2EB-CAB78B59A805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7CF2461-FFF2-49E4-A2EB-CAB78B59A805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7CF2461-FFF2-49E4-A2EB-CAB78B59A805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7CF2461-FFF2-49E4-A2EB-CAB78B59A805}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{ED86C3CA-A7A0-4522-829F-E149A80854F6} = {F0821DCF-FFF6-41D8-91B1-859EF1393EE0}
 		{4ADEAADE-6D9A-497B-A779-5D626F14F744} = {EC876A71-29D6-44F0-8728-441BFA2E79A0}
+		{A7CF2461-FFF2-49E4-A2EB-CAB78B59A805} = {05389D89-6CA3-4C80-AB6E-D4C1C7B77746}
 	EndGlobalSection
 EndGlobal

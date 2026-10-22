@@ -29,7 +29,7 @@ Proyecto final de Programación II, Ingeniería en Sistemas, UMG. Aplicación C#
 |---|---|---|
 | 1 | Script SQL completo, datos de ejemplo y README inicial | Entregada; ejecución en SQL Server pendiente |
 | 2 | Backend completo | Entregado y compilado; 61 comprobaciones locales correctas; integración SQL pendiente |
-| 3 | FrmPrincipal y UcLogin | Pendiente |
+| 3 | FrmPrincipal y UcLogin | Entregada y compilada; ejecución Windows/SQL pendiente |
 | 4 | UserControls de Clientes, Vehículos, Espacios y Tarifas | Pendiente |
 | 5 | Forms modales | Pendiente |
 | 6 | UcEntradaSalida y UcPagos | Pendiente |
@@ -52,7 +52,7 @@ Al finalizar la etapa 2 sí existen solución, biblioteca y consola de pruebas. 
 
 ## Próximo paso de desarrollo
 
-Esperar «continúa» antes de comenzar la etapa 3: crear GestionParqueo.UI (Windows Forms net8.0-windows) bajo Frontend, referenciar LibreriaClases, e implementar solo FrmPrincipal y UcLogin. Usar Sesion.Iniciar(usuario, clave), Sesion.Cerrar y Sesion.EsAdministrador. Conservar controles estándar, menú oculto antes del login y visibilidad por rol. No avanzar a módulos de etapas 4–7 sin autorización. Mantener los permisos de los repositorios aunque la UI oculte botones.
+Esperar «continúa» antes de comenzar la etapa 4: implementar UcClientes, UcVehiculos, UcEspacios y UcTarifas, sin adelantar formularios modales de la etapa 5. FrmPrincipal mantiene las opciones visibles pero deshabilitadas hasta conectar cada módulo. Cajero debe poder consultar Clientes/Vehículos sin modificar; Administrador gestiona información base. Mantener la validación de rol en backend aunque la UI oculte botones.
 
 ## Registro que debe completar cada etapa
 
@@ -101,4 +101,13 @@ Se actualizaron install_script y start_skill del borrador de entorno para restau
 
 ### Decisión posterior a la entrega de etapa 2
 
-El usuario eligió «Mantener únicamente Microsoft.Data.SqlClient». No agregar paquetes directos adicionales para fijar dependencias transitivas. Se conservan los avisos de Pkcs documentados, sin desactivar la auditoría y sin afirmar que se resolvieron. No se autoriza con esta respuesta avanzar a la etapa 3; esperar «continúa».
+El usuario eligió «Mantener únicamente Microsoft.Data.SqlClient». No agregar paquetes directos adicionales para fijar dependencias transitivas. Se conservan los avisos de Pkcs documentados, sin desactivar la auditoría y sin afirmar que se resolvieron. La respuesta sobre dependencias no autorizó por sí sola la etapa 3; el usuario la autorizó después con «continúa».
+
+## Etapa 3 — Entrega del 22 de octubre de 2026
+
+- Agregados Frontend/GestionParqueo.UI/GestionParqueo.UI.csproj (Windows Forms net8.0-windows, sin paquete directo adicional), Program.cs, FrmPrincipal.cs y Controles/UcLogin.cs; reservada Forms/.gitkeep. La solución y el lock de NuGet incluyen la UI.
+- FrmPrincipal usa MenuStrip arriba y Panel Dock Fill; CargarControl(UserControl) reemplaza y desecha el control anterior. Al inicio y al cerrar sesión presenta UcLogin y oculta el menú. Tras acceso válido, muestra saludo y submenús según Administrador/Cajero. Las opciones de módulos posteriores están visibles según rol pero deshabilitadas hasta implementar sus pantallas.
+- UcLogin usa controles estándar, campos Usuario/Contraseña, contraseña oculta, Enter para ingresar, validación de campos, Sesion.Iniciar y un evento AccesoConcedido. Captura SqlException para explicar un fallo de conexión. No replica hash ni consulta SQL en el frontend.
+- Restauración --use-lock-file y compilación Release de toda la solución: cero errores y cero advertencias. No se ejecutó la UI porque la máquina es Linux. Inicio, login SQL, menú y cierre de sesión deben comprobarse en Windows con LocalDB/SQL Server y autenticación de Windows.
+- README se amplió con rutas, pasos Visual Studio, prueba manual, limitaciones, problemas y resumen de POO. La guía rápida ahora indica cómo iniciar GestionParqueo.UI.
+- El destino Git de este proyecto es la rama main de AlejandrouUmgGt/Gesti-nParqueoSolution. La captura mostrada por el usuario correspondía a otro repositorio, GestorDePedidosSolution. Conservar este destino para las entregas de parqueo.

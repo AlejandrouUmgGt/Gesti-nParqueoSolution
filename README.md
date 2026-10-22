@@ -13,9 +13,10 @@ Leer primero `MEMORIA.md` y `docs/REQUISITOS_ORIGINALES.txt`. La entrega se divi
 2. En SSMS, con **Autenticación de Windows**, abre y ejecuta completo [el script de la base de datos](BaseDatos/01_ParqueoDB.sql). Comprueba que finaliza sin errores.
 3. Abre [la solución en Visual Studio](GestionParqueoSolution.sln) y compílala con **Compilar → Compilar solución**. Si SQL Server no está en LocalDB, ajusta la constante `Servidor` en [Conexion.cs](Backend/LibreriaClases/Datos/Conexion.cs).
 4. Para comprobar el backend, configura **PruebasBackend** como proyecto de inicio y ejecuta con **Ctrl+F5**. Debe informar 61 comprobaciones correctas. Estas pruebas locales no requieren conectarse a SQL Server.
-5. Las pruebas integradas con SQL están preparadas para Windows; la guía y el comando están en [Pruebas y compilación de la etapa 2](#comandos-de-compilación-y-pruebas). Usa una base de desarrollo.
+5. En Windows, establece **GestionParqueo.UI** como proyecto de inicio y presiona **F5**. Debe aparecer únicamente el formulario de acceso. Después de ejecutar el SQL inicial, inicia sesión con el administrador de demostración indicado en la etapa 1.
+6. Las pruebas integradas con SQL están preparadas para Windows; la guía y el comando están en [Pruebas y compilación de la etapa 2](#comandos-de-compilación-y-pruebas). Usa una base de desarrollo.
 
-El proyecto todavía no tiene interfaz gráfica: **FrmPrincipal y UcLogin corresponden a la etapa 3**. Consulta [todas las instrucciones de la base de datos](#etapa-1--base-de-datos-y-documentación), [las instrucciones de Visual Studio y el backend](#pasos-concretos-en-visual-studio), o la [memoria de continuidad](MEMORIA.md).
+La etapa 3 ya incluye **FrmPrincipal y UcLogin**. Para abrir el programa, selecciona GestionParqueo.UI como proyecto de inicio en Visual Studio. Consulta [las instrucciones de la etapa 3](#etapa-3--ventana-principal-e-inicio-de-sesión), [todas las instrucciones de la base de datos](#etapa-1--base-de-datos-y-documentación), [las instrucciones de Visual Studio y el backend](#pasos-concretos-en-visual-studio), o la [memoria de continuidad](MEMORIA.md).
 
 ## Requisitos
 
@@ -279,4 +280,80 @@ Una misma llamada a CalcularTarifa produce resultados diferentes según la clase
 Los repositorios guardan los objetos y GestorParqueo coordina entradas, salidas y pagos sin dejar cambios a medias.
 Las contraseñas se verifican con hash y la sesión limita las operaciones según el rol.
 
-La siguiente entrega es la etapa 3: FrmPrincipal y UcLogin. Se espera «continúa» antes de implementarla.
+La etapa 3 se autorizó con «continúa» y se describe a continuación.
+
+
+## Etapa 3 — Ventana principal e inicio de sesión
+
+La solución ahora incluye una aplicación Windows Forms, `GestionParqueo.UI`. Se entrega `FrmPrincipal` con menú y panel contenedor, y `UcLogin` para iniciar sesión. La aplicación referencia a LibreriaClases. Se usaron controles estándar sin estilos personalizados.
+
+### Archivos de esta etapa
+
+| Ruta | Para qué sirve |
+|---|---|
+| `GestionParqueoSolution.sln` | Incluye GestionParqueo.UI dentro de la carpeta de solución Frontend. |
+| `Frontend/GestionParqueo.UI/GestionParqueo.UI.csproj` | Proyecto Windows Forms net8.0-windows; referencia LibreriaClases sin paquetes directos adicionales. |
+| `Frontend/GestionParqueo.UI/packages.lock.json` | Versiones e integridad de las dependencias resueltas. |
+| `Frontend/GestionParqueo.UI/Program.cs` | Punto de entrada que abre FrmPrincipal. |
+| `Frontend/GestionParqueo.UI/FrmPrincipal.cs` | MenuStrip, Panel contenedor, CargarControl, visibilidad por rol y cierre de sesión. |
+| `Frontend/GestionParqueo.UI/Controles/UcLogin.cs` | Usuario, contraseña oculta, validación y acceso mediante Sesion.Iniciar. |
+| `Frontend/GestionParqueo.UI/Forms/.gitkeep` | Reserva la carpeta Forms para los formularios modales de la etapa 5. |
+| `README.md` y `MEMORIA.md` | Instrucciones acumulativas y estado para continuar. |
+
+### Pasos concretos en Visual Studio
+
+1. Instala Visual Studio 2022 con «Desarrollo de escritorio de .NET» y el SDK .NET 8. Conserva las rutas de los archivos entregados.
+2. Ejecuta completo `BaseDatos/01_ParqueoDB.sql` en SSMS con **Autenticación de Windows**, si todavía no lo hiciste. Comprueba que existe ParqueoDB y el empleado `admin`.
+3. Abre `GestionParqueoSolution.sln`. En el Explorador de soluciones verás **Backend → LibreriaClases** y **Frontend → GestionParqueo.UI**. La referencia de UI a LibreriaClases ya está agregada en el `.csproj`.
+4. Si tu instancia no es LocalDB, abre `Backend/LibreriaClases/Datos/Conexion.cs` y cambia la constante `Servidor` por el nombre real, por ejemplo `@".\SQLEXPRESS"`. La conexión seguirá usando Integrated Security=True y TrustServerCertificate=True.
+5. Permite restaurar los paquetes NuGet y usa **Compilar → Compilar solución**. La única referencia directa de paquete de la aplicación sigue siendo Microsoft.Data.SqlClient en LibreriaClases.
+6. Haz clic derecho en **GestionParqueo.UI → Establecer como proyecto de inicio**. Presiona **F5**. Se abrirá la ventana «Gestión de Parqueo» con el control de login y el menú oculto.
+7. Escribe `admin` y la contraseña pública de demostración `ParqueoDemo2026!`. Tras el acceso verás el saludo y el menú. Usa **Sesión → Cerrar sesión**: debe volver a aparecer el login y desaparecer el menú.
+
+Para construir desde terminal:
+
+```shell
+dotnet restore GestionParqueoSolution.sln --locked-mode
+dotnet build GestionParqueoSolution.sln --configuration Release --no-restore
+```
+
+En Windows, con la base preparada, también puedes iniciar la interfaz mediante `dotnet run --project Frontend/GestionParqueo.UI --configuration Release --no-build`.
+
+### Qué debe verse y cómo comprobarlo
+
+- Al abrir, solo aparece el acceso. El menú no se muestra antes de una sesión válida.
+- Si usuario o contraseña están vacíos, se pide completarlos sin intentar consultar la base. Si son incorrectos o el empleado está inactivo, aparece un aviso y continúa el login.
+- Con `admin`, el menú muestra Información Base (Clientes, Vehículos, Espacios y Tarifas), Movimientos (Entradas y salidas, Pagos), Consultas y Reportes (Reportes) y Sesión (Cerrar sesión).
+- Con una cuenta Cajero activa, el menú muestra Clientes y Vehículos en Información Base, Entradas y salidas, Pagos, Reportes y Cerrar sesión. No aparecen Espacios ni Tarifas. Crear una cuenta Cajero queda para una etapa posterior; no usar contraseñas en texto plano en SQL para probarlo.
+- Las entradas de menú de módulos futuros se ven deshabilitadas hasta que existan sus pantallas. Cerrar sesión ya funciona. Los repositorios también exigen rol Administrador para las modificaciones de información base.
+- Si falla la conexión, se muestra el error del servidor para poder comprobar la instancia de SQL Server y la configuración de Windows.
+
+`UcLogin` genera un evento cuando Sesion.Iniciar acepta al empleado. `FrmPrincipal` reemplaza el control del panel con CargarControl(UserControl uc), revela el menú según el rol y muestra el nombre de la persona. Al cerrar, Sesion.Cerrar borra el empleado actual y FrmPrincipal vuelve a cargar UcLogin.
+
+### Problemas comunes añadidos
+
+| Problema | Qué revisar |
+|---|---|
+| La UI no inicia en Visual Studio | Marca GestionParqueo.UI como proyecto de inicio; LibreriaClases es una biblioteca. Ejecuta en Windows, con la carga de Windows Forms instalada. |
+| Error al conectar durante el login | Revisa el nombre de `Servidor` en Conexion.cs, que la instancia esté encendida, que ParqueoDB exista y que tu cuenta de Windows tenga acceso. |
+| El administrador de ejemplo no entra | Ejecuta el SQL de la etapa 1, verifica `Activo=1` para `admin` y usa la contraseña de demostración. Reejecutar el SQL no reemplaza un hash ya existente. |
+| La UI no encuentra LibreriaClases | Comprueba la referencia de proyecto en GestionParqueo.UI.csproj y restaura NuGet. |
+| Las opciones aparecen deshabilitadas | Las pantallas de esos módulos corresponden a etapas posteriores. En esta etapa funciona login, visibilidad del menú y cierre de sesión. |
+
+### POO para la exposición
+
+FrmPrincipal depende del control base `UserControl`: CargarControl recibe ese tipo y puede mostrar UcLogin ahora y otros controles en etapas posteriores. Sesion.Iniciar recupera un Empleado, que hereda de Persona. Se reutiliza el backend de la etapa 2 sin copiar la lógica de contraseñas en la interfaz.
+
+### Validación y límites de la etapa 3
+
+En este entorno Linux, `dotnet restore GestionParqueoSolution.sln --use-lock-file` y `dotnet build GestionParqueoSolution.sln --configuration Release --no-restore` terminaron correctamente con **cero errores y cero advertencias**, incluida la aplicación WinForms. Esto comprueba compilación, no la ejecución de la ventana. El arranque, el login real contra SQL Server y el cierre de sesión requieren la comprobación en Windows descrita arriba. La restricción de un único paquete directo permanece; los avisos transitivos de NuGet señalados en la etapa 2 siguen pendientes por decisión del usuario.
+
+### Resumen para exponer (máximo cinco líneas)
+
+FrmPrincipal muestra un UserControl dentro de un panel y permite reemplazarlo sin crear otra ventana principal.
+UcLogin pide usuario y contraseña, y Sesion.Iniciar verifica el hash en el backend.
+El menú se oculta hasta iniciar sesión y presenta las opciones permitidas según el rol.
+Cerrar sesión limpia el empleado actual y vuelve a mostrar el control de acceso.
+La interfaz reutiliza la clase Empleado, hija de Persona, y deja preparada la carga de otros controles.
+
+La siguiente entrega es la etapa 4: controles de Clientes, Vehículos, Espacios y Tarifas. Se espera «continúa» antes de implementarla.
