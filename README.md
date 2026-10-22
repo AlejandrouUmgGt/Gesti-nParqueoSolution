@@ -7,6 +7,16 @@ C# y Windows Forms con SQL Server. Código sencillo para explicar abstracción, 
 
 Leer primero `MEMORIA.md` y `docs/REQUISITOS_ORIGINALES.txt`. La entrega se divide en ocho etapas y se espera el «continúa» del usuario entre ellas. Este README conserva las etapas anteriores y se amplía al cerrar cada entrega.
 
+## Guía rápida para empezar
+
+1. Instala **Visual Studio 2022** con «Desarrollo de escritorio de .NET», el **SDK .NET 8**, **SQL Server Express o LocalDB** y **SSMS**.
+2. En SSMS, con **Autenticación de Windows**, abre y ejecuta completo [el script de la base de datos](BaseDatos/01_ParqueoDB.sql). Comprueba que finaliza sin errores.
+3. Abre [la solución en Visual Studio](GestionParqueoSolution.sln) y compílala con **Compilar → Compilar solución**. Si SQL Server no está en LocalDB, ajusta la constante `Servidor` en [Conexion.cs](Backend/LibreriaClases/Datos/Conexion.cs).
+4. Para comprobar el backend, configura **PruebasBackend** como proyecto de inicio y ejecuta con **Ctrl+F5**. Debe informar 61 comprobaciones correctas. Estas pruebas locales no requieren conectarse a SQL Server.
+5. Las pruebas integradas con SQL están preparadas para Windows; la guía y el comando están en [Pruebas y compilación de la etapa 2](#comandos-de-compilación-y-pruebas). Usa una base de desarrollo.
+
+El proyecto todavía no tiene interfaz gráfica: **FrmPrincipal y UcLogin corresponden a la etapa 3**. Consulta [todas las instrucciones de la base de datos](#etapa-1--base-de-datos-y-documentación), [las instrucciones de Visual Studio y el backend](#pasos-concretos-en-visual-studio), o la [memoria de continuidad](MEMORIA.md).
+
 ## Requisitos
 
 - Windows y Visual Studio 2022 actualizado, con la carga «Desarrollo de escritorio de .NET».
